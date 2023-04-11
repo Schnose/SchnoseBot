@@ -1,0 +1,40 @@
+[package]
+name = "schnosebot"
+version = "1.0.0"
+authors = ["AlphaKeks <alphakeks@dawn.sh>"]
+edition = "2021"
+description = "Library used by other repositories in the [Schnose](https://github.com/Schnose) organization."
+documentation = "https://github.com/Schnose/SchnoseBot/wiki"
+readme = "./README.md"
+homepage = "https://github.com/Schnose"
+repository = "https://github.com/Schnose/SchnoseBot"
+license-file = "./LICENSE"
+publish = false
+
+# Error handling
+[dependencies.thiserror]
+version = "1"
+
+# Logging
+[dependencies.tracing]
+version = "0.1"
+
+# Utilities
+[dependencies.chrono]
+version = "0.4"
+
+[dependencies.fuzzy-matcher]
+version = "0.3"
+
+# JSON parsing
+[dependencies.serde]
+version = "1"
+features = ["derive"]
+
+[dependencies.serde_json]
+version = "1"
+
+# GOKZ
+[dependencies.gokz_rs]
+version = "0.18"
+features = ["global_api", "schnose_api"]
