@@ -6,6 +6,9 @@ pub mod global_map;
 /// Utility functions to extend `serde` (like parsing dates)
 pub mod serde;
 
+/// Utility function to format seconds to `HH:MM:SS.MS`.
+pub mod time;
+
 pub type Result<T> = std::result::Result<T, Error>;
 
 use thiserror::Error;
