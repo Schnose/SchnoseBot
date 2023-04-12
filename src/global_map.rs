@@ -160,27 +160,37 @@ impl GlobalMap {
 			MapIdentifier::ID(map_id) => maps
 				.iter()
 				.find_map(|map| (map.id == map_id).then_some(map.clone())),
-			MapIdentifier::Name(map_name) => {
-				let fzf = SkimMatcherV2::default();
-				let map_name = map_name.to_lowercase();
-
-				maps.iter()
-					.filter_map(|map| {
-						if map_name.is_empty() {
-							return Some((100, map.clone()));
-						}
-
-						let score = fzf.fuzzy_match(&map.name.to_lowercase(), &map_name)?;
-
-						if score >= 50 {
-							Some((score, map.clone()))
-						} else {
-							None
-						}
-					})
-					.max_by(|(a_score, _), (b_score, _)| a_score.cmp(b_score))
-					.map(|(_, map)| map)
-			}
+			MapIdentifier::Name(map_name) => Self::fuzzy_match(&map_name, maps)
+				.first()
+				.cloned(),
 		}
+	}
+
+	pub fn fuzzy_match(map_name: &str, maps: &[Self]) -> Vec<Self> {
+		let fzf = SkimMatcherV2::default();
+		let map_name = map_name.to_lowercase();
+
+		let mut maps = maps
+			.iter()
+			.filter_map(|map| {
+				if map_name.is_empty() {
+					return Some((100, map.clone()));
+				}
+
+				let score = fzf.fuzzy_match(&map.name.to_lowercase(), &map_name)?;
+
+				if score >= 50 {
+					Some((score, map.clone()))
+				} else {
+					None
+				}
+			})
+			.collect::<Vec<_>>();
+
+		maps.sort_unstable_by(|(a_score, _), (b_score, _)| a_score.cmp(b_score));
+
+		maps.into_iter()
+			.map(|(_, map)| map)
+			.collect()
 	}
 }
