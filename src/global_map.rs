@@ -1,3 +1,5 @@
+use gokz_rs::schnose_api::maps::index::Mapper;
+
 use {
 	crate::serde::{deser_naive_date_time, ser_naive_date_time},
 	chrono::NaiveDateTime,
@@ -19,7 +21,7 @@ pub struct GlobalMap {
 	pub id: u16,
 	pub name: String,
 	pub tier: Tier,
-	pub validated: bool,
+	pub global: bool,
 	pub courses: Vec<Course>,
 	/// Whether the map's main course has a KZT filter
 	pub kzt: bool,
@@ -27,11 +29,9 @@ pub struct GlobalMap {
 	pub skz: bool,
 	/// Whether the map's main course has a VNL filter
 	pub vnl: bool,
-	pub mapper_name: String,
-	pub mapper_steam_id: Option<SteamID>,
-	pub approver_name: String,
+	pub mappers: Vec<Mapper>,
 	pub approver_steam_id: Option<SteamID>,
-	pub filesize: u64,
+	pub filesize: u32,
 	#[serde(serialize_with = "ser_naive_date_time")]
 	#[serde(deserialize_with = "deser_naive_date_time")]
 	pub created_on: NaiveDateTime,
@@ -56,9 +56,10 @@ impl GlobalMap {
 	}
 
 	/// A link to the mapper's Steam profile.
-	pub fn mapper_steam(&self) -> Option<String> {
-		self.mapper_steam_id
-			.map(|steam_id| format!("https://steamcommunity.com/profiles/{}", steam_id.as_id64()))
+	pub fn mapper_steamids(&self) -> impl Iterator + '_ {
+		self.mappers.iter().map(|mapper| {
+			format!("https://steamcommunity.com/profiles/{}", mapper.steam_id.as_id64())
+		})
 	}
 
 	/// A link to the approver's Steam profile.
@@ -97,14 +98,11 @@ impl GlobalMap {
 		for Map {
 			id,
 			name,
-			tier,
-			courses,
-			validated,
-			mapper_name,
-			mapper_steam_id,
-			approver_name,
-			approver_steam_id,
+			global,
 			filesize,
+			courses,
+			mappers,
+			approved_by,
 			created_on,
 			updated_on,
 		} in fetched_maps
@@ -130,16 +128,14 @@ impl GlobalMap {
 			maps.push(GlobalMap {
 				id,
 				name,
-				tier,
-				validated,
+				tier: courses[0].tier,
+				global,
 				courses,
 				kzt,
 				skz,
 				vnl,
-				mapper_name,
-				mapper_steam_id,
-				approver_name,
-				approver_steam_id,
+				mappers,
+				approver_steam_id: approved_by,
 				filesize,
 				created_on,
 				updated_on,
